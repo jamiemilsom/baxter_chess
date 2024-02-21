@@ -7,10 +7,15 @@ from copy import deepcopy
 # http://wiki.ros.org/simulator_gazebo/Tutorials/ListOfMaterials
 
 if __name__ == '__main__':
+    
     rospy.init_node("spawn_chessboard")
     rospy.wait_for_service("gazebo/spawn_sdf_model")
 
     srv_call = rospy.ServiceProxy("gazebo/spawn_sdf_model", SpawnModel)
+    
+    # Make a way for Baxter to go to a home position using pick_and_place_moveit.py
+    # add code
+    
     
     # Table
     model_path = rospkg.RosPack().get_path('baxter_sim_examples')+"/models/"
@@ -38,7 +43,7 @@ if __name__ == '__main__':
     # Add chessboard into the simulation
     print srv_call("chessboard", board_xml, "", board_pose, "world")
 
-    # Add chesspieces into the simulation
+    # Add chess pieces into the simulation
     origin_piece = 0.03125
 
     pieces_xml = dict()
@@ -46,23 +51,40 @@ if __name__ == '__main__':
     for each in list_pieces:
         with open(model_path + each+".sdf", "r") as f:
             pieces_xml[each] = f.read().replace('\n', '')
-
+    
+    # Choose which board setup to use
     board_setup = ['rnbqkbnr', 'pppppppp', '', '', '', '', 'PPPPPPPP', 'RNBQKBNR']
     # board_setup = ['r******r', '', '**k*****', '', '', '******K*', '', 'R******R']
 
     piece_positionmap = dict()
     piece_names = []
+    
+    # Get spawn location argument 
+    spawn_location = sys.argv[1].lower() 
+
+    # Spawn pieces based on the chosen location
     for row, each in enumerate(board_setup):
-        # print row
+        
         for col, piece in enumerate(each):
-            pose = deepcopy(board_pose)
-            pose.position.x = board_pose.position.x + frame_dist + origin_piece + row * (2 * origin_piece)
-            pose.position.y = board_pose.position.y - 0.55 + frame_dist + origin_piece + col * (2 * origin_piece)
-            pose.position.z += 0.018
+            if spawn_location == "edge":
+                edge_spawn_loc = deepcopy(board_pose)
+                edge_spawn_loc.position.x = 0.6
+                edge_spawn_loc.position.y = 0.6
+                edge_spawn_loc.position.z = 0.8
+                pose = edge_spawn_loc
+                
+            else:
+                pose = deepcopy(board_pose)
+                pose.position.x = board_pose.position.x + frame_dist + origin_piece + row * (2 * origin_piece)
+                pose.position.y = board_pose.position.y - 0.55 + frame_dist + origin_piece + col * (2 * origin_piece)
+                pose.position.z += 0.018
+                
             piece_positionmap[str(row)+str(col)] = [pose.position.x, pose.position.y, pose.position.z-0.93] #0.93 to compensate Gazebo RViz origin difference
             if piece in list_pieces:
                 piece_names.append("%s%d" % (piece,col))
-                spawn_sdf(piece + str(col), pieces_xml[piece], "", pose, "world")
+                
+                
+                spawn_sdf(piece + str(col), pieces_xml[piece], "", pose, "world") # Spawn pieces at correct location
 
     rospy.set_param('board_setup', board_setup) # Board setup
     rospy.set_param('list_pieces', list_pieces) # List of unique pieces
