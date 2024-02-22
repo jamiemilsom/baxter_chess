@@ -1,0 +1,8 @@
+prefix=/home/vagrant/baxter_chess/install
+
+Name: baxter_chess_pkg
+Description: Description of baxter_chess_pkg
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/vagrant/baxter_chess/install/lib 
+Requires: 

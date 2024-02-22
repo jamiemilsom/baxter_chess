@@ -59,8 +59,9 @@ if __name__ == '__main__':
     piece_positionmap = dict()
     piece_names = []
     
-    # Get spawn location argument 
-    spawn_location = sys.argv[1].lower() 
+    # Get spawn location argument
+    
+    spawn_location = sys.argv[0].lower() 
 
     # Spawn pieces based on the chosen location
     for row, each in enumerate(board_setup):

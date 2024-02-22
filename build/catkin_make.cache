@@ -1,0 +1,2 @@
+baxter_chess_pkg
+-DCATKIN_DEVEL_PREFIX=/home/vagrant/baxter_chess/devel -DCMAKE_INSTALL_PREFIX=/home/vagrant/baxter_chess/install -G Unix Makefiles
