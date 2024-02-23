@@ -196,9 +196,9 @@ def main():
     # Load Gazebo Models via Spawning Services
     # Note that the models reference is the /world frame
     # and the IK operates with respect to the /base frame
-    load_gazebo_models()
+    #load_gazebo_models()
     # Remove models from the scene on shutdown
-    rospy.on_shutdown(delete_gazebo_models)
+    #rospy.on_shutdown(delete_gazebo_models)
 
     # Wait for the All Clear from emulator startup
     rospy.wait_for_message("/robot/sim/started", Empty)
@@ -221,28 +221,40 @@ def main():
     # You may wish to replace these poses with estimates
     # from a perception node.
 
-    # NOTE: Remember that there's an offset in Rviz wrt Gazebo. We need
+    # NOTE: Remember that there's an offset in Rviz wrt Gazebo. rosrun baxter_tools enable_robot.py -eWe need
     # to command MoveIt! to go below because the table is 74 cm height.
     # Since the offset is 0.93, we just simply need to substract
     # 0.74 - 0.93 = -0.15 in Z
-    block_poses.append(Pose(
-        position=Point(x=0.7, y=0.135, z=-0.14),
-        orientation=overhead_orientation))
-    # Feel free to add additional desired poses for the object.
-    # Each additional pose will get its own pick and place.
-    block_poses.append(Pose(
-        position=Point(x=0.7, y=-0.135, z=-0.14),
-        orientation=overhead_orientation))
+    one_block = 0.06251499999999999
+
+    pos1 =Pose(
+        position=Point(x=0.418730, y=0.306256-one_block, z=-0.14),
+        orientation=overhead_orientation)
+
+    pos2 = Pose(
+        position=Point(x=0.418730, y=0.306256-one_block, z=-0.07),
+        orientation=overhead_orientation)
+
+
+    pos3 = Pose(
+        position=Point(x=0.418730 + 2*one_block, y=0.306256-one_block, z=-0.07),
+        orientation=overhead_orientation)
+
+    pos4 =Pose(
+        position=Point(x=0.418730 + 2*one_block, y=0.306256-one_block, z=-0.14),
+        orientation=overhead_orientation)
+
+
 
     # Move to the desired starting angles
     pnp.move_to_start(starting_pose)
     idx = 0
     while not rospy.is_shutdown():
-        print("\nPicking...")
-        pnp.pick(block_poses[idx])
-        print("\nPlacing...")
-        idx = (idx+1) % len(block_poses)
-        pnp.place(block_poses[idx])
+        pnp._approach(pos2)
+        pnp.pick(pos1)
+        pnp._approach(pos2)
+        pnp._approach(pos3)
+        pnp.place(pos4)
     return 0
 
 
